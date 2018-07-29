@@ -1,6 +1,5 @@
 (ns lcd)
 
-(def lcd ["111222333" "111222333" "111222333"])
 (def parcel-width 3)
 
 (def parcels {
@@ -74,5 +73,7 @@
   [lcd parcel]
   (map #(apply str (concat %1 %2)) lcd parcel))
 
-(defn write-lcd [str]
-  (reduce #(append-parcel %1 %2) (map #(get charmap % (get charmap \space)) str)))
+(defn write-lcd [in-str]
+  (if (empty? in-str)
+    []
+    (reduce #(append-parcel %1 %2) [[] [] []] (map #(get charmap % (get charmap \space)) in-str))))
