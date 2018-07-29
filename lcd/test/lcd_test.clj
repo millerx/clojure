@@ -33,8 +33,8 @@
                  "|_|"
                  "|_|"
                  " _ "]) => "8")
-    (fact "Screen height less then one parcel are ignored."
-      (read-lcd [" __ __"]) => "")))
+    (fact "Screen height less then one parcel is treated as one unrecognised parcel."
+      (read-lcd [" __ __"]) => "  ")))
 
 (facts "write-lcd"
   (fact "Write string of numbers to LCD text."
