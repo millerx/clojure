@@ -35,7 +35,6 @@
 	(reduce (fn [% part] (into % (set [part (matching-part part)])))
 		[] asym-body-parts))
 
-
 ;; More verbose symmetrize-body-parts that shows off a few more Clojure core functions.
 (defn _symmetrize-body-parts
 	"Expects a seq of maps that have a :name and :size"
