@@ -8,8 +8,8 @@
 (defn pos-char [pos]
   (char (+ 65 pos)))
 
-(defn peg-char [b]
-  (if ? \0 \-))
+(defn peg-char [peg]
+  ([\0\-] peg))
 
 ; Turns a board into a seq of pegStrs.
 ; board -> [pegStr]

@@ -5,8 +5,8 @@
 (deftest test-create-board
   (testing "Create board"
     (is (= [] (create-board 0)))
-    (is (= [[false]] (create-board 1)))
-    (is (= [[false] [false false]] (create-board 2)))))
+    (is (= [[0]] (create-board 1)))
+    (is (= [[0] [0 0]] (create-board 2)))))
 
 (deftest test-base-size
   (testing "Calcualte board's base size"
@@ -29,27 +29,27 @@
 (deftest test-valid-move
   (testing "Valid moves"
     (let [board 
-      [[true]
-    [false true]
-  [false false false]
-[false false true true]]]
+  [[1]
+  [0 1]
+ [0 0 0]
+[0 0 1 1]]]
       (is (valid-move? board [[0 0] [2 2]])) ; From first peg
       (is (valid-move? board [[3 3] [3 1]])))) ; From last peg
   (testing "Invalid moves"
     (let [board
-      [[true]
-    [false false]
-  [false false true]
-[false false true true]]]
+  [[1]
+  [0 0]
+ [0 0 1]
+[0 0 1 1]]]
       (is (not (valid-move? board [[-1 -1] [1 1]]))) ; Start off board
       (is (not (valid-move? board [[2 2] [4 4]]))) ; End off board
       (is (not (valid-move? board [[1 0] [1 2]]))))) ; Dest is off-board to the right
   (testing "More invalid moves"
     (let [board
-      [[true]
-    [false false]
-  [false true false]
-[true true false false]]]
+  [[1]
+  [0 0]
+ [0 1 0]
+[1 1 0 0]]]
       (is (not (valid-move? board [[0 0] [2 2]]))) ; No peg to jump
       (is (not (valid-move? board [[2 0] [2 2]]))) ; No peg at starting pos
       (is (not (valid-move? board [[3 0] [3 3]]))) ; Too far of a jump
@@ -61,15 +61,26 @@
 (deftest test-make-move
   (testing "Test making some moves"
     (is (=
-    [[false]
-  [false false] 
-[false false true]]
+ [[0]
+ [0 0] 
+[0 0 1]]
       (make-move
-    [[true]
-  [false true]
-[false false false]]
+ [[1]
+ [0 1]
+[0 0 0]]
         [[0 0] [2 2]])))))
 
-(deftest test-has-won?
+(deftest test-winner?
   (testing "Is this a winning board?"
-    (is (has-won? :board))))
+    (is (winner? ; board with single peg
+ [[0]
+ [0 0] 
+[0 0 1]]))
+    (is (not (winner? ; board with multiple pegs
+ [[1]
+ [0 1]
+[0 0 0]])))
+    (is (winner? (create-board 3))) ; Board with no pegs
+    (is (winner? [[1]])) ; 1-peg board with peg
+    (is (winner? [[0]])) ; 1-peg board without peg
+    (is (winner? [])))) ; zero-length board

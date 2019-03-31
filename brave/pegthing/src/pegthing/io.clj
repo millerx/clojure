@@ -40,6 +40,6 @@
     (let [move (prompt-for-move)
           new-board (pt/make-move move board)]
       (print-board new-board)
-      (if (pt/has-won? new-board)
+      (if (pt/winner? new-board)
         (println "You have won!")
         (recur new-board)))))
