@@ -1,45 +1,44 @@
 (ns pegthing.io
   (require [clojure.string :as str])
-  (require [pegthing.core :as pt])
-  (:gen-class))
+  (require [pegthing.core :as pt]))
 
-; Prompts and then waits for input until newline is read.
-; Input is then trimmed.
-; If trimmed input is empty then default is returned.
-; f('', '') -> ''
-(defn prompt [pstr default]
-  (println (format "%s [%s]" pstr default))
-  (let [input (str/trim (read-line))]
-    (if (empty? input)
-      default
-      input)))
-
-(defn prompt-rows []
-  (prompt "How many rows?" 5))
+; Prompts for input and validates it.
+; If the validation-fn throws then the prompt is repeated.
+(defn prompt [prompt-str validation-fn]
+  (first (drop-while #{::validation-error} (repeatedly
+    #(try
+      (println prompt-str)
+      (let [raw-input (read-line)
+            valid-input (validation-fn raw-input)]
+        ; Pad last input with a newline if user did not type anything visible.
+        (if-not (empty? (str/trim raw-input)) (println))
+        valid-input)
+      (catch Exception _ ::validation-error))))))
 
 ; Prompts for an initial board.
-; nil -> board
 (defn prompt-for-initial-board []
-  (println "init board?")
-  :board)
-
-; Prompts for next move.
-; nil -> move
-(defn prompt-for-move []
-  (println "move?")
-  :move)
+  (pt/create-board (let [default-rows 5]
+    (prompt (format "How many rows? [%d]" default-rows)
+      #(if (empty? %) default-rows (Integer/parseInt %))))))
 
 ; Prints the board to the screen
-; board -> board
+; TODO: A stub.
 (defn print-board [board]
   (println board))
+
+; Prompts for next move.
+(defn prompt-for-move []
+  (prompt "move?" ""))
+
+; TODO: A stub until prompt-for-move is imlemented.
+(defn make-move [move board]
+  (println "Performing move" move)
+  board)
 
 (defn -main [& args]
   (println "Get ready to play peg thing!")
   (loop [board (prompt-for-initial-board)]
-    (let [move (prompt-for-move)
-          new-board (pt/make-move move board)]
-      (print-board new-board)
-      (if (pt/winner? new-board)
-        (println "You have won!")
-        (recur new-board)))))
+    (print-board board)
+    (if (pt/winner? board)
+      (println "You have won!")
+      (recur (make-move (prompt-for-move) board)))))

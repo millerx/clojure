@@ -5,16 +5,16 @@
 ; Board: Vector of vector of pegs.
 ;   Each vector is one element larger than the last, representing the triangular board.
 ;   Ex.)
-;   [[0]
-;   [0 0]
-;   [0 0 0]]
+;   [[1]
+;   [1 1]
+;   [1 1 1]]
 ; Position (pos): Pair of integers. Row then column.
 ; Move: Pair of positions.
 
-; Creates a board of the given base size.
+; Creates a board full of pegs of the given base size.
 ; n -> board
 (defn create-board [base-size]
-  (vec (map #(vec (repeat (inc %) 0))
+  (vec (map #(vec (repeat (inc %) 1))
     (range base-size))))
 
 ; Returns the size of the base of the given board.
