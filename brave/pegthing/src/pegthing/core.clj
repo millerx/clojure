@@ -38,6 +38,17 @@
 (defn- peg? [board pos]
   (= 1 (get-peg board pos)))
 
+; Adds or removes a peg.
+; board pos peg -> board
+(defn- change-peg [board [row col] peg]
+  (assoc board row ; Change row vector on board.
+    (assoc (board row) col peg))) ; Change peg in row vector.
+
+; Removes a peg.
+; board pos -> board
+(defn remove-peg [board pos]
+  (change-peg board pos 0))
+
 ; Returns true if the move is valid else false.
 ; board move -> bool
 (defn valid-move? [board [startPos endPos]]
@@ -52,22 +63,16 @@
     (catch IndexOutOfBoundsException e
       false)))
 
-; Adds or removes a peg.
-; board pos peg -> board
-(defn- change-peg [board [row col] peg]
-  (assoc board row ; Change row vector on board.
-    (assoc (board row) col peg))) ; Change peg in row vector.
-
-; Removes a peg.
-; board pos -> board
-(defn remove-peg [board pos] (change-peg board pos 0))
+; Validates a move. Returns the move if it is valid else throws.
+(defn validate-move [board move]
+  (if (valid-move? board move)
+    move
+    (throw (RuntimeException. "Move is not valid"))))
 
 ; Makes the move on the board and returns the new board.
 ; board move -> board
 (defn make-move [board move]
-  (if (not (valid-move? board move))
-    (throw (RuntimeException. "Move is not valid")))
-  (let [[startPos endPos] move
+  (let [[startPos endPos] (validate-move board move)
         delta (map - endPos startPos)
         jumpedPos (map + startPos (map #(/ % 2) delta))]
     (-> board

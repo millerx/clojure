@@ -21,24 +21,35 @@
     (prompt (format "How many rows? [%d]" default-rows)
       #(if (empty? %) default-rows (Integer/parseInt %))))))
 
-; Prints the board to the screen
+; Creates the initial board. Prompts for board size and removes a random peg.
+(defn create-initial-board []
+  (let [board (prompt-for-initial-board)]
+    (pt/remove-peg board [2 2]))) ; TODO: Random peg
+
+; Prints the board to the screen.
 ; TODO: A stub.
 (defn print-board [board]
   (println board))
 
-; Prompts for next move.
-(defn prompt-for-move []
-  (prompt "move?" ""))
+; Parses a string into a move. Ex.) "A0 C2" -> [[0 0] [2 2]]
+; If the given string is not valid then nil is returned.
+(defn parse-move [str]
+  (if-let [match (re-matches #"([A-Z][0-9]) ([A-Z][0-9])" (.toUpperCase str))]
+    (map (fn [[row col]]
+      [(- (int row) 65) ; ASCII "A"=65
+       (- (int col) 48)]) ; ASCII "0"=48
+      (rest match))))
 
-; TODO: A stub until prompt-for-move is imlemented.
-(defn make-move [move board]
-  (println "Performing move" move)
-  board)
+; Makes a move provided by the user.
+(defn make-move [board]
+  (pt/make-move board (prompt "Move?"
+    #(pt/validate-move board (parse-move %)))))
 
+; Entry point.
 (defn -main [& args]
   (println "Get ready to play peg thing!")
-  (loop [board (prompt-for-initial-board)]
+  (loop [board (create-initial-board)]
     (print-board board)
     (if (pt/winner? board)
       (println "You have won!")
-      (recur (make-move (prompt-for-move) board)))))
+      (recur (make-move board)))))
