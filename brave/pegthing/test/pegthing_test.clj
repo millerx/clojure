@@ -5,8 +5,8 @@
 (deftest test-create-board
   (testing "Create board"
     (is (= [] (create-board 0)))
-    (is (= [[0]] (create-board 1)))
-    (is (= [[0] [0 0]] (create-board 2)))))
+    (is (= [[1]] (create-board 1)))
+    (is (= [[1] [1 1]] (create-board 2)))))
 
 (deftest test-base-size
   (testing "Calcualte board's base size"
@@ -14,17 +14,6 @@
       (is (test-fn 0))
       (is (test-fn 1))
       (is (test-fn 2)))))
-
-(deftest test-valid-move
-  (testing "Validate position"
-    (let [board (create-board 4)]
-      (is (valid-move? board [[0 0] [2 2]])) ; From first peg
-      (is (valid-move? board [[3 3] [1 1]])) ; From last peg
-      (is (not (valid-move? board [[-1 0] [1 2]])))
-      (is (not (valid-move? board [[0 -1] [2 1]])))
-      (is (not (valid-move? board [[1 0] [1 2]]))))) ; Dest is off-board to the right
-  (testing "Zero-length board"
-    (is (not (valid-move? [] [[0 0] [2 2]]))))) ; Even 0,0 is not valid on a zero-length board.
 
 (deftest test-valid-move
   (testing "Valid moves"
@@ -80,7 +69,7 @@
  [[1]
  [0 1]
 [0 0 0]])))
-    (is (winner? (create-board 3))) ; Board with no pegs
+    (is (winner? [[0] [0 0] [0 0 0]])) ; Board with no pegs
     (is (winner? [[1]])) ; 1-peg board with peg
     (is (winner? [[0]])) ; 1-peg board without peg
     (is (winner? [])))) ; zero-length board

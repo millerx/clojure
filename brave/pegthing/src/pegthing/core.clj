@@ -54,9 +54,13 @@
 
 ; Adds or removes a peg.
 ; board pos peg -> board
-(defn change-peg [board [row col] peg]
+(defn- change-peg [board [row col] peg]
   (assoc board row ; Change row vector on board.
     (assoc (board row) col peg))) ; Change peg in row vector.
+
+; Removes a peg.
+; board pos -> board
+(defn remove-peg [board pos] (change-peg board pos 0))
 
 ; Makes the move on the board and returns the new board.
 ; board move -> board
