@@ -47,6 +47,14 @@
   (testing "Zero-length board"
     (is (not (valid-move? [] [[0 0] [2 2]]))))) ; Even 0,0 is not valid on a zero-length board.
 
+(deftest test-validate-move
+  (testing "Test validation of a move"
+    (let [move [[0 0] [2 2]]
+          board [[1] [0 1] [0 0 0]]]
+      (is (= move (validate-move board move))) ; Valid move.
+      (is (nil? (validate-move [] move))) ; Invalid move. Position out of bounds.
+      (is (nil? (validate-move board nil)))))) ; Propagate nil move.
+
 (deftest test-make-move
   (testing "Test making some moves"
     (is (=

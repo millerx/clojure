@@ -63,17 +63,15 @@
     (catch IndexOutOfBoundsException e
       false)))
 
-; Validates a move. Returns the move if it is valid else throws.
+; Validates a move. Returns the move if it is valid else nil.
+; Returns nil if move is nil.
 (defn validate-move [board move]
-  (if (valid-move? board move)
-    move
-    (throw (RuntimeException. "Move is not valid"))))
+  (if (and move (valid-move? board move)) move))
 
 ; Makes the move on the board and returns the new board.
 ; board move -> board
-(defn make-move [board move]
-  (let [[startPos endPos] (validate-move board move)
-        delta (map - endPos startPos)
+(defn make-move [board [startPos endPos]]
+  (let [delta (map - endPos startPos)
         jumpedPos (map + startPos (map #(/ % 2) delta))]
     (-> board
       (change-peg startPos 0)
