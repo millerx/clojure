@@ -14,46 +14,63 @@
     (set! *mockin* rest)
     line))
 
-(defmacro testing-io
-  [string & body]
-  `(binding [*mockout* [] ; *mockin* should be bound with test data.
-             *testing-contexts* (conj *testing-contexts* ~string)]
-     (with-redefs [pegthing.io/pt-println mock-println
-                   pegthing.io/pt-read-line mock-read-line]
-       ~@body)))
+(defmacro with-io
+  [inputs & body]
+  `(binding [*mockin* ~inputs *mockout* []]
+    (with-redefs [pegthing.io/pt-println mock-println
+                  pegthing.io/pt-read-line mock-read-line]
+      ~@body)))
 
 (deftest test-parse-move
-  (testing "Parse move"
-    (is (= [[0 0] [2 2]] (parse-move "A1 C3")))
-    (is (= [[0 0] [2 2]] (parse-move "a1 c3"))) ; Lower case
-    (is (nil? (parse-move "54 c5"))))) ; Invalid move string
+  (is (= [[0 0] [2 2]] (parse-move "A1 C3")))
+  (is (= [[0 0] [2 2]] (parse-move "a1 c3")) "Lower case")
+  (is (nil? (parse-move "54 c5")) "Invalid input"))
 
 (deftest test-print-board
-  (testing-io "Board with one row"
-    (print-board [[1]])
-    (is (= *mockout* [["A1:*"]])))
-  (testing-io "Board with zero rows"
-    (print-board [[]])
-    (is (= *mockout* [[""]])))
-  (testing-io "A standard board"
-    (let [board (pt/remove-peg (pt/create-board 4) [1 1])]
-      (print-board board)
-      (is (= *mockout*) [
-        ["            A1:*"]
-        ["        B1:*    B2:*"]
-        ["    C1:*    C2:_    C3:*"]
-        ["D1:*    D2:*    D3:*    D4:*"]]))))
+  (testing "Board with one row"
+    (with-io nil
+      (print-board [[1]])
+      (is (= *mockout* [["A1:*"]]))))
+  (testing "Board with zero rows"
+    (with-io nil
+      (print-board [[]])
+      (is (= *mockout* [[""]]))))
+  (testing "A standard board"
+    (with-io nil
+      (let [board (pt/remove-peg (pt/create-board 4) [1 1])]
+        (print-board board)
+        (is (= *mockout*) [
+["            A1:*"]
+["        B1:*    B2:*"]
+["    C1:*    C2:_    C3:*"]
+["D1:*    D2:*    D3:*    D4:*"]])))))
 
 (deftest test-prompt-for-initial-board
-  (testing-io "Default value"
-    (binding [*mockin* '("")]
-      (is (= 5 (prompt-for-initial-board)))
-      (is (= [["How many rows? [5]"]] *mockout*))))
-  (testing-io "Another value"
-    (binding [*mockin* '("3")]
-      (is (= 3 (prompt-for-initial-board)))))
-  (testing-io "Bad input"
-    ; Enter bad input "foo". Then we are prompted again and take the default value.
-    (binding [*mockin* '("foo" "")]
-      (is (= 5 (prompt-for-initial-board)))
-      (is (= (repeat 2 ["How many rows? [5]"]) *mockout*)))))
+  (let [prompt ["How many rows? [5]"]]
+    (testing "Default value"
+      (with-io '("")
+        (is (= 5 (prompt-for-initial-board)) "Default value")
+        (is (= [prompt] *mockout*))))
+    (testing "Another value"
+      (with-io '("3")
+        (is (= 3 (prompt-for-initial-board)))))
+    (testing "Bad input"
+      (with-io '("foo" "") ; Enter bad input "foo" then "" for default value.
+        (is (= 5 (prompt-for-initial-board)) "Default value")
+        (is (= (repeat 2 prompt) *mockout*) "Prompted twice")))))
+
+(deftest test-prompt-for-move
+  (let [prompt ["Move?"]
+        board (pt/remove-peg (pt/create-board 3) [2 2])]
+    (testing "Valid move"
+      (with-io '("a1 c3")
+        (is (= [[0 0] [2 2]] (prompt-for-move board)))
+        (is (= [prompt] *mockout*))))
+    (testing "Invalid move"
+      (with-io '("a1 d4" "a1 c3")
+        (is (= [[0 0] [2 2]] (prompt-for-move board)))
+        (is (= (repeat 2 prompt) *mockout*) "Prompted twice")))
+    (testing "Invalid input"
+      (with-io '("foo" "a1 c3")
+        (is (= [[0 0] [2 2]] (prompt-for-move board)))
+        (is (= (repeat 2 prompt) *mockout*) "Prompted twice")))))

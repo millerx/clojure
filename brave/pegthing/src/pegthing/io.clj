@@ -11,13 +11,13 @@
 
 ; Prompts for input and validates it.
 ; If the validation-fn is falsy or throws then the prompt is repeated.
-(defn prompt [prompt-str validation-fn]
+(defn- prompt [prompt-str validation-fn]
   (first (drop-while nil? (repeatedly #(do
     (pt-println prompt-str)
     (validation-fn (pt-read-line)))))))
 
 ; Parses a String into an Integer. Returns nil if parse fails.
-(defn parse-int [str]
+(defn- parse-int [str]
   (try
     (Integer/parseInt str)
     (catch NumberFormatException _ nil)))
@@ -28,10 +28,10 @@
     (prompt (format "How many rows? [%d]" DEFAULT-ROWS)
         #(if (empty? %) DEFAULT-ROWS (parse-int %)))))
 
-; Creates the initial board. Prompts for board size and removes a random peg.
-(defn create-initial-board []
+; Creates the initial board. Prompts for board size and removes a peg.
+(defn- create-initial-board []
   (let [board (pt/create-board (prompt-for-initial-board))]
-    (pt/remove-peg board [2 2]))) ; TODO: Random peg
+    (pt/remove-peg board [0 0]))) ; TODO: Random peg
 
 ; Turns a peg into a string. Ex A1:*
 (defn- peg-str [row col peg]
@@ -62,10 +62,11 @@
   (if-let [match (re-matches #"([A-Z][0-9]) ([A-Z][0-9])" (.toUpperCase str))]
     (map parse-pos (rest match))))
 
-; Makes a move provided by the user.
-(defn make-move [board]
-  (pt/make-move board (prompt "Move?"
-    #(pt/validate-move board (parse-move %)))))
+; Prompts for a move.
+; board is passed in to validate the move.
+(defn prompt-for-move [board]
+  (prompt "Move?"
+    #(pt/validate-move board (parse-move %))))
 
 ; Entry point.
 (defn -main [& args]
@@ -75,4 +76,4 @@
     (print-board board)
     (if (pt/winner? board)
       (pt-println "You have won!")
-      (recur (make-move board)))))
+      (recur (pt/make-move board (prompt-for-move board))))))
