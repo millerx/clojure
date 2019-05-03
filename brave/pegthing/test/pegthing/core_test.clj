@@ -1,6 +1,6 @@
 (ns pegthing.core-test
   (:require [clojure.test :refer :all]
-            [pegthing.core :refer :all]))
+    [pegthing.core :refer :all]))
 
 (deftest test-create-board
   (is (= [] (create-board 0)))
