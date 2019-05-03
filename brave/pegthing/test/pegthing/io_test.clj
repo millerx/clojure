@@ -1,7 +1,7 @@
 (ns pegthing.io-test
   (:require [clojure.test :refer :all]
-            [pegthing.io :refer :all]
-            [pegthing.core :as pt]))
+    [pegthing.io :refer :all]
+    [pegthing.core :refer :all]))
 
 (def ^:dynamic *mockin*)
 (def ^:dynamic *mockout*)
@@ -21,30 +21,6 @@
                   pegthing.io/pt-read-line mock-read-line]
       ~@body)))
 
-(deftest test-parse-move
-  (is (= [[0 0] [2 2]] (parse-move "A1 C3")))
-  (is (= [[0 0] [2 2]] (parse-move "a1 c3")) "Lower case")
-  (is (nil? (parse-move "54 c5")) "Invalid input"))
-
-(deftest test-print-board
-  (testing "Board with one row"
-    (with-io nil
-      (print-board [[1]])
-      (is (= *mockout* [["A1:*"]]))))
-  (testing "Board with zero rows"
-    (with-io nil
-      (print-board [[]])
-      (is (= *mockout* [[""]]))))
-  (testing "A standard board"
-    (with-io nil
-      (let [board (pt/remove-peg (pt/create-board 4) [1 1])]
-        (print-board board)
-        (is (= *mockout*) [
-["            A1:*"]
-["        B1:*    B2:*"]
-["    C1:*    C2:_    C3:*"]
-["D1:*    D2:*    D3:*    D4:*"]])))))
-
 (deftest test-prompt-for-initial-board
   (let [prompt ["How many rows? [5]"]]
     (testing "Default value"
@@ -61,7 +37,7 @@
 
 (deftest test-prompt-for-move
   (let [prompt ["Move?"]
-        board (pt/remove-peg (pt/create-board 3) [2 2])]
+        board (remove-peg (create-board 3) [2 2])]
     (testing "Valid move"
       (with-io '("a1 c3")
         (is (= [[0 0] [2 2]] (prompt-for-move board)))
