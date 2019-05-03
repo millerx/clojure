@@ -1,4 +1,5 @@
-(ns lcd)
+(ns lcd
+	(require [clojure.set]))
 
 (def parcel-width 3)
 

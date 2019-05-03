@@ -1,60 +1,64 @@
 (ns lcd-test
-  (:use midje.sweet)
-  (:use [lcd]))
+  (:require [clojure.test :refer :all]
+    [lcd :refer :all]))
 
-(facts "read-lcd"
-  (fact "Read LCD with a few numbers on it."
-    (read-lcd ["    _  _ "
-               "  | _| _|"
-               "  ||_  _|"]) => "123")
+(deftest test-read-lcd
+  (is (= "123" (read-lcd [
+"    _  _ "
+"  | _| _|"
+"  ||_  _|"])) "Read LCD with a few numbers on it.")
 
-  (fact "Reading an empty screen should produce an empty string."
-    (read-lcd []) => ""
-    (read-lcd [""
-               ""
-               ""]) => "")
+  (testing "Reading an empty screen should produce an empty string."
+    (is (= "" (read-lcd [])))
+    (is (= "" (read-lcd [
+""
+""
+""]))))
 
-  (fact "Read unrecognised parcel gets turned into a space."
-    (read-lcd [" _ "
-               "|_|"
-               "| |"]) => " ")
+  (is (= " " (read-lcd [
+" _ "
+"|_|"
+"| |"])) "Read unrecognised parcel gets turned into a space.")
 
-  (facts "Invalid screen dimensions"
-    (fact "Screen data beyond the last even parcel width becomes a space character."
-      (read-lcd [" _ _"
-                 "|_|_"
-                 "|_|_"]) => "8 ")
-    (fact "Screen width less then one parcel is treated as one unrecognised parcel."
-          (read-lcd ["_"
-                     "_"
-                     "_"]) => " ")
-    (fact "Rows of a screen greater then one parcel height are ignored."
-      (read-lcd [" _ "
-                 "|_|"
-                 "|_|"
-                 " _ "]) => "8")
-    (fact "Screen height less then one parcel is treated as one unrecognised parcel."
-      (read-lcd [" __ __"]) => "  ")))
+  (testing "Invalid screen dimensions"
+    (is (= "8 " (read-lcd [
+" _ _"
+"|_|_"
+"|_|_"])) "Screen data beyond the last even parcel width becomes a space character.")
 
-(facts "write-lcd"
-  (fact "Write string of numbers to LCD text."
-    (write-lcd "123") => ["    _  _ "
-                          "  | _| _|"
-                          "  ||_  _|"])
+    (is (= " " (read-lcd [
+"_"
+"_"
+"_"])) "Screen width less then one parcel is treated as one unrecognised parcel.")
 
-  (fact "Empty string as input produces an empty screen."
-    (write-lcd "") => [])
+    (is (= "8" (read-lcd [
+" _ "
+"|_|"
+"|_|"
+" _ "])) "Rows of a screen greater then one parcel height are ignored.")
 
-  (fact "Unprintable character produces 'space' parcel."
-    (write-lcd "X") => ["   "
-                        "   "
-                        "   "]))
+    (is (= "  " (read-lcd [" __ __"]))
+      "Screen height less then one parcel is treated as one unrecognised parcel.")))
 
-(fact "Duality between read-lcd and write-lcd."
-  ; We start with an invalid parcel so we prove that the replacement character also satisfies duality
-  ; when fed back in.
-  (let [read-out-str (read-lcd ["    _  _  _ "
-                                "  | _||_| _|"
-                                "  ||_ | | _|"])]
-    read-out-str => "12 3"
-    (read-lcd (write-lcd read-out-str)) => read-out-str))
+(deftest test-write-lcd
+  (is (= (write-lcd "123") [
+"    _  _ "
+"  | _| _|"
+"  ||_  _|"]) "Write string of numbers to LCD text.")
+
+  (is (= (write-lcd "") []) "Empty string as input produces an empty screen.")
+
+  (is (= (write-lcd "X") [
+"   "
+"   "
+"   "]) "Unprintable character produces 'space' parcel."))
+
+(deftest test-read-write-duality
+  ; We start with an invalid parcel so we prove that the replacement character also satisfies 
+  ; duality when fed back in.
+  (let [read-out-str (read-lcd [
+"    _  _  _ "
+"  | _||_| _|"
+"  ||_ | | _|"])]
+    (is (= "12 3" read-out-str))
+    (is (= read-out-str (read-lcd (write-lcd read-out-str))))))
